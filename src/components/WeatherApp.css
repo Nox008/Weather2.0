@@ -1,0 +1,77 @@
+/* Rain Animation */
+.rain {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.raindrop {
+    position: absolute;
+    top: -50px;
+    width: 2px;
+    height: 50px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+    animation: fall linear infinite;
+}
+
+.rain.light .raindrop {
+    animation-duration: 3s;
+}
+
+.rain.moderate .raindrop {
+    animation-duration: 2s;
+}
+
+.rain.heavy .raindrop {
+    animation-duration: 1s;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(100vh);
+    }
+}
+
+/* Snow Animation */
+.snow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.snowflake {
+    position: absolute;
+    top: -10%;
+    width: 6px;
+    height: 6px;
+    background: white;
+    border-radius: 50%;
+    filter: blur(1px);
+    animation: snowfall linear infinite;
+}
+
+.snow.light .snowflake {
+    animation-duration: 10s;
+}
+
+.snow.moderate .snowflake {
+    animation-duration: 7s;
+}
+
+.snow.heavy .snowflake {
+    animation-duration: 5s;
+}
+
+@keyframes snowfall {
+    to {
+        transform: translateY(100vh);
+    }
+}
