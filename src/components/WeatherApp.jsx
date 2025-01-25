@@ -7,7 +7,7 @@ import rainIcon from '../assets/rainy.svg';
 import snowIcon from '../assets/snowy.svg';
 import sunIcon from '../assets/sunny.svg';
 import windIcon from '../assets/wind.svg';
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer, toast, Bounce } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './WeatherApp.css'; // Import custom CSS for animations
 
@@ -53,10 +53,17 @@ const WeatherApp = () => {
                 return "bg-gradient-to-br from-gray-500 to-white";
             case "13d": // Snowy
             case "13n":
-                return "bg-gradient-to-br from-white to-blue-100";
+                return "bg-gradient-to-br from-blue-300 to-white"; // Slight bluish-white background
             default:
                 return "bg-gradient-to-br from-[#2f4680] to-[#500ae4]"; // Default gradient
         }
+    };
+
+    const getTextColor = (weatherIcon) => {
+        if (weatherIcon === "13d" || weatherIcon === "13n") {
+            return "text-black"; // Black text for snowy weather
+        }
+        return "text-white"; // White text for other weather conditions
     };
 
     const getIntensity = (weatherDescription) => {
@@ -144,29 +151,29 @@ const WeatherApp = () => {
                             alt="Weather Icon"
                             className="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-4 sm:mb-6 animate-pulse"
                         />
-                        <p className="text-white text-lg sm:text-xl font-semibold capitalize mb-2">
+                        <p className={`${getTextColor(weatherData.weatherIcon)} text-lg sm:text-xl font-semibold capitalize mb-2`}>
                             {weatherData.description}
                         </p>
-                        <p className="text-white text-6xl sm:text-7xl font-bold my-4 sm:my-6">
+                        <p className={`${getTextColor(weatherData.weatherIcon)} text-6xl sm:text-7xl font-bold my-4 sm:my-6`}>
                             {weatherData.temperature}°C
                         </p>
-                        <p className="text-white text-base sm:text-lg mb-4">
+                        <p className={`${getTextColor(weatherData.weatherIcon)} text-base sm:text-lg mb-4`}>
                             Feels Like: {weatherData.feelsLike}°C
                         </p>
-                        <p className="text-white text-2xl sm:text-3xl font-semibold mb-6 sm:mb-8">
+                        <p className={`${getTextColor(weatherData.weatherIcon)} text-2xl sm:text-3xl font-semibold mb-6 sm:mb-8`}>
                             {weatherData.location}
                         </p>
 
                         <div className="flex flex-col sm:flex-row justify-between gap-4 sm:gap-6 mt-6 sm:mt-8">
                             <div className="flex flex-col items-center bg-white/10 rounded-lg p-4 w-full sm:w-1/2 backdrop-blur-sm">
                                 <img src={humidIcon} alt="Humidity" className="w-6 h-6 sm:w-8 sm:h-8 mb-2" />
-                                <span className="text-white text-base sm:text-lg">{weatherData.humidity}%</span>
-                                <span className="text-white text-sm">Humidity</span>
+                                <span className={`${getTextColor(weatherData.weatherIcon)} text-base sm:text-lg`}>{weatherData.humidity}%</span>
+                                <span className={`${getTextColor(weatherData.weatherIcon)} text-sm`}>Humidity</span>
                             </div>
                             <div className="flex flex-col items-center bg-white/10 rounded-lg p-4 w-full sm:w-1/2 backdrop-blur-sm">
                                 <img src={windIcon} alt="Wind" className="w-6 h-6 sm:w-8 sm:h-8 mb-2" />
-                                <span className="text-white text-base sm:text-lg">{weatherData.wind} Km/h</span>
-                                <span className="text-white text-sm">Wind</span>
+                                <span className={`${getTextColor(weatherData.weatherIcon)} text-base sm:text-lg`}>{weatherData.wind} Km/h</span>
+                                <span className={`${getTextColor(weatherData.weatherIcon)} text-sm`}>Wind</span>
                             </div>
                         </div>
                     </div>
@@ -185,7 +192,7 @@ const WeatherApp = () => {
                 draggable
                 pauseOnHover
                 theme="light"
-                transition="Bounce"
+                transition={Bounce}
             />
         </div>
     );
