@@ -9,11 +9,21 @@ import sunIcon from '../assets/sunny.svg';
 import windIcon from '../assets/wind.svg';
 import { ToastContainer, toast, Bounce } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import './WeatherApp.css'; // Import custom CSS for animations
+import './WeatherApp.css';
 
 const WeatherApp = () => {
     const inputRef = useRef();
     const [weatherData, setWeatherData] = useState(false);
+
+    // Country code to full name mapping
+    const getCountryName = (countryCode) => {
+        try {
+            const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+            return regionNames.of(countryCode);
+        } catch (error) {
+            return countryCode; // Fallback to country code if conversion fails
+        }
+    };
 
     const allIcons = {
         "01d": sunIcon,
@@ -30,46 +40,54 @@ const WeatherApp = () => {
         "09n": rainIcon,
         "10d": rainIcon,
         "10n": rainIcon,
+        "11d": rainIcon,
+        "11n": rainIcon,
         "13d": snowIcon,
         "13n": snowIcon,
     };
 
     const getBackgroundStyle = (weatherIcon) => {
         switch (weatherIcon) {
-            case "01d": // Sunny
+            case "01d":
             case "01n":
                 return "bg-gradient-to-br from-blue-400 to-blue-600";
-            case "02d": // Cloudy
+            case "02d":
             case "02n":
             case "03d":
             case "03n":
             case "04d":
             case "04n":
                 return "bg-gradient-to-br from-gray-300 to-gray-500";
-            case "09d": // Rainy
+            case "09d":
             case "09n":
             case "10d":
             case "10n":
                 return "bg-gradient-to-br from-gray-500 to-white";
-            case "13d": // Snowy
+            case "11d":
+            case "11n":
+                return "bg-gradient-to-br from-gray-900 to-gray-700";
+            case "13d":
             case "13n":
-                return "bg-gradient-to-br from-blue-300 to-white"; // Slight bluish-white background
+                return "bg-gradient-to-br from-blue-100 to-white";
             default:
-                return "bg-gradient-to-br from-[#2f4680] to-[#500ae4]"; // Default gradient
+                return "bg-gradient-to-br from-[#2f4680] to-[#500ae4]";
         }
     };
 
     const getTextColor = (weatherIcon) => {
         if (weatherIcon === "13d" || weatherIcon === "13n") {
-            return "text-black"; // Black text for snowy weather
+            return "text-black";
         }
-        return "text-white"; // White text for other weather conditions
+        if (weatherIcon === "11d" || weatherIcon === "11n") {
+            return "text-white";
+        }
+        return "text-white";
     };
 
     const getIntensity = (weatherDescription) => {
         if (weatherDescription.includes("light")) return "light";
         if (weatherDescription.includes("heavy")) return "heavy";
-        return "moderate"; // Default intensity
+        return "moderate";
     };
 
     const search = async (city) => {
@@ -91,11 +109,12 @@ const WeatherApp = () => {
                 wind: data.wind.speed,
                 temperature: Math.floor(data.main.temp),
                 location: data.name,
+                country: getCountryName(data.sys.country),
                 icon: icon,
                 description: data.weather[0].description,
                 feelsLike: Math.floor(data.main.feels_like),
-                weatherIcon: data.weather[0].icon, // Store the weather icon code
-                intensity: getIntensity(data.weather[0].description.toLowerCase()), // Determine intensity
+                weatherIcon: data.weather[0].icon,
+                intensity: getIntensity(data.weather[0].description.toLowerCase()),
             });
         } catch (error) {
             setWeatherData(false);
@@ -111,7 +130,7 @@ const WeatherApp = () => {
     return (
         <div className={`flex flex-col items-center justify-center min-h-screen p-4 sm:p-6 ${weatherData ? getBackgroundStyle(weatherData.weatherIcon) : "bg-gradient-to-br from-[#2f4680] to-[#500ae4]"}`}>
             {/* Rain Animation */}
-            {weatherData && (weatherData.weatherIcon === "09d" || weatherData.weatherIcon === "09n" || weatherData.weatherIcon === "10d" || weatherData.weatherIcon === "10n") && (
+            {weatherData && (weatherData.weatherIcon === "09d" || weatherData.weatherIcon === "09n" || weatherData.weatherIcon === "10d" || weatherData.weatherIcon === "10n" || weatherData.weatherIcon === "11d" || weatherData.weatherIcon === "11n") && (
                 <div className={`rain ${weatherData.intensity}`}>
                     {Array.from({ length: weatherData.intensity === "light" ? 50 : weatherData.intensity === "heavy" ? 150 : 100 }).map((_, index) => (
                         <div key={index} className="raindrop" style={{ left: `${Math.random() * 100}%`, animationDelay: `${Math.random() * 2}s` }}></div>
@@ -124,6 +143,21 @@ const WeatherApp = () => {
                 <div className={`snow ${weatherData.intensity}`}>
                     {Array.from({ length: weatherData.intensity === "light" ? 50 : weatherData.intensity === "heavy" ? 150 : 100 }).map((_, index) => (
                         <div key={index} className="snowflake" style={{ left: `${Math.random() * 100}%`, animationDelay: `${Math.random() * 2}s` }}></div>
+                    ))}
+                </div>
+            )}
+
+            {/* Thunderstorm Animation */}
+            {weatherData && (weatherData.weatherIcon === "11d" || weatherData.weatherIcon === "11n") && (
+                <div className="thunderstorm">
+                    {Array.from({ length: 3 }).map((_, index) => (
+                        <div
+                            key={index}
+                            className={`lightning ${['intense', 'moderate', 'distant'][index]}`}
+                            style={{
+                                animationDelay: `${Math.random() * 5}s`,
+                            }}
+                        ></div>
                     ))}
                 </div>
             )}
@@ -160,9 +194,14 @@ const WeatherApp = () => {
                         <p className={`${getTextColor(weatherData.weatherIcon)} text-base sm:text-lg mb-4`}>
                             Feels Like: {weatherData.feelsLike}°C
                         </p>
-                        <p className={`${getTextColor(weatherData.weatherIcon)} text-2xl sm:text-3xl font-semibold mb-6 sm:mb-8`}>
-                            {weatherData.location}
-                        </p>
+                        <div className="mb-6 sm:mb-8">
+                            <p className={`${getTextColor(weatherData.weatherIcon)} text-2xl sm:text-3xl font-semibold mb-1`}>
+                                {weatherData.location}
+                            </p>
+                            <p className={`${getTextColor(weatherData.weatherIcon)} text-sm sm:text-base opacity-75`}>
+                                {weatherData.country}
+                            </p>
+                        </div>
 
                         <div className="flex flex-col sm:flex-row justify-between gap-4 sm:gap-6 mt-6 sm:mt-8">
                             <div className="flex flex-col items-center bg-white/10 rounded-lg p-4 w-full sm:w-1/2 backdrop-blur-sm">
@@ -180,7 +219,6 @@ const WeatherApp = () => {
                 )}
             </div>
 
-            {/* Toast Container */}
             <ToastContainer
                 position="top-center"
                 autoClose={5000}

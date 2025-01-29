@@ -1,3 +1,89 @@
+/* General Styles */
+.weather {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow: hidden;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.search-bar input {
+    height: 40px;
+    padding: 0 15px;
+    border: none;
+    border-radius: 20px;
+    outline: none;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+}
+
+.search-bar img {
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.search-bar img:hover {
+    transform: scale(1.1);
+}
+
+.weather-icon {
+    width: 100px;
+    height: 100px;
+    margin: 20px 0;
+}
+
+.temp {
+    font-size: 48px;
+    font-weight: bold;
+    color: white;
+}
+
+.location {
+    font-size: 24px;
+    color: white;
+    margin-bottom: 20px;
+}
+
+.weather-data {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px;
+    border-radius: 10px;
+    backdrop-filter: blur(10px);
+}
+
+.col img {
+    width: 30px;
+    height: 30px;
+    margin-bottom: 5px;
+}
+
+.col span {
+    font-size: 14px;
+    color: white;
+}
+
 /* Rain Animation */
 .rain {
     position: absolute;
@@ -14,16 +100,16 @@
     top: -50px;
     width: 2px;
     height: 50px;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+    background: rgba(255, 255, 255, 0.7);
     animation: fall linear infinite;
 }
 
 .rain.light .raindrop {
-    animation-duration: 3s;
+    animation-duration: 2s;
 }
 
 .rain.moderate .raindrop {
-    animation-duration: 2s;
+    animation-duration: 1.5s;
 }
 
 .rain.heavy .raindrop {
@@ -49,7 +135,7 @@
 
 .snowflake {
     position: absolute;
-    top: -10%;
+    top: -10px;
     width: 6px;
     height: 6px;
     background: white;
@@ -73,5 +159,98 @@
 @keyframes snowfall {
     to {
         transform: translateY(100vh);
+    }
+}
+
+/* Thunderstorm Animation */
+.thunderstorm {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.lightning {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    opacity: 0;
+    animation: lightningFlash linear infinite;
+}
+
+@keyframes lightningFlash {
+    0% { 
+        opacity: 0;
+    }
+    0.5% {
+        background: rgba(255, 255, 255, 0.3);
+        opacity: 0.4;
+    }
+    1% {
+        opacity: 0.2;
+    }
+    1.5% {
+        background: rgba(255, 255, 255, 0.3);
+        opacity: 0.3;
+    }
+    2% {
+        opacity: 0;
+        background: transparent;
+    }
+    100% {
+        opacity: 0;
+        background: transparent;
+    }
+}
+
+/* Adjust flash intensity */
+.lightning.intense {
+    animation-duration: 6s;
+}
+
+.lightning.moderate {
+    animation-duration: 8s;
+}
+
+.lightning.distant {
+    animation-duration: 10s;
+}
+
+/* Softer flash effect with subtle blue tint */
+.lightning::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 50% 50%, 
+        rgba(200, 220, 255, 0.2),
+        rgba(200, 220, 255, 0.1) 40%,
+        transparent 70%);
+    opacity: 0;
+    animation: inherit;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .temp {
+        font-size: 36px;
+    }
+
+    .location {
+        font-size: 20px;
+    }
+
+    .weather-data {
+        flex-direction: column;
+        gap: 10px;
     }
 }
