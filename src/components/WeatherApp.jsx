@@ -14,14 +14,14 @@ import './WeatherApp.css';
 const WeatherApp = () => {
     const inputRef = useRef();
     const [weatherData, setWeatherData] = useState(false);
+    const [loading, setLoading] = useState(true);
 
-    // Country code to full name mapping
     const getCountryName = (countryCode) => {
         try {
             const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
             return regionNames.of(countryCode);
         } catch (error) {
-            return countryCode; // Fallback to country code if conversion fails
+            return countryCode;
         }
     };
 
@@ -68,7 +68,7 @@ const WeatherApp = () => {
                 return "bg-gradient-to-br from-gray-900 to-gray-700";
             case "13d":
             case "13n":
-                return "bg-gradient-to-br from-blue-100 to-white";
+                return "bg-gradient-to-br from-blue-400 to-white";
             default:
                 return "bg-gradient-to-br from-[#2f4680] to-[#500ae4]";
         }
@@ -90,9 +90,70 @@ const WeatherApp = () => {
         return "moderate";
     };
 
+    const searchByCoordinates = async (latitude, longitude) => {
+        try {
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${import.meta.env.VITE_APP_ID}`;
+            const response = await fetch(url);
+            const data = await response.json();
+            
+            if (!response.ok) {
+                toast(data.message);
+                search("Kochi");
+                return;
+            }
+
+            const icon = allIcons[data.weather[0].icon] || sunIcon;
+            setWeatherData({
+                humidity: data.main.humidity,
+                wind: data.wind.speed,
+                temperature: Math.floor(data.main.temp),
+                location: data.name,
+                country: getCountryName(data.sys.country),
+                icon: icon,
+                description: data.weather[0].description,
+                feelsLike: Math.floor(data.main.feels_like),
+                weatherIcon: data.weather[0].icon,
+                intensity: getIntensity(data.weather[0].description.toLowerCase()),
+            });
+        } catch (error) {
+            console.error("Error fetching data by coordinates:", error);
+            search("Kochi");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const getUserLocation = () => {
+        if ("geolocation" in navigator) {
+            setLoading(true);
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    searchByCoordinates(position.coords.latitude, position.coords.longitude);
+                },
+                (error) => {
+                    console.error("Geolocation error:", error);
+                    toast("Couldn't get your location. Showing default city.");
+                    search("Kochi");
+                    setLoading(false);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                }
+            );
+        } else {
+            toast("Geolocation is not supported by your browser");
+            search("Kochi");
+            setLoading(false);
+        }
+    };
+
     const search = async (city) => {
+        setLoading(true);
         if (city === '') {
             toast("Enter City Name");
+            setLoading(false);
             return;
         }
         try {
@@ -120,11 +181,13 @@ const WeatherApp = () => {
             setWeatherData(false);
             console.error("Error fetching data");
             toast('An Error Occurred!');
+        } finally {
+            setLoading(false);
         }
     };
 
     useEffect(() => {
-        search("Kochi");
+        getUserLocation();
     }, []);
 
     return (
@@ -170,15 +233,29 @@ const WeatherApp = () => {
                         placeholder="Search City"
                         className="flex-1 h-12 px-4 rounded-full bg-white/90 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all w-full sm:w-auto"
                     />
-                    <img
-                        src={searchIcon}
-                        alt="Search"
-                        className="w-10 h-10 p-2 rounded-full bg-white/90 cursor-pointer hover:bg-white/80 transition-all hover:scale-105 mt-3 sm:mt-0"
-                        onClick={() => search(inputRef.current.value)}
-                    />
+                    <div className="flex gap-2">
+                        <img
+                            src={searchIcon}
+                            alt="Search"
+                            className="w-10 h-10 p-2 rounded-full bg-white/90 cursor-pointer hover:bg-white/80 transition-all hover:scale-105"
+                            onClick={() => search(inputRef.current.value)}
+                        />
+                        <button
+                            onClick={getUserLocation}
+                            className="h-10 px-3 rounded-full bg-white/90 text-gray-700 hover:bg-white/80 transition-all hover:scale-105 flex items-center justify-center"
+                            title="Get current location"
+                        >
+                            📍
+                        </button>
+                    </div>
                 </div>
 
-                {weatherData && (
+                {loading ? (
+                    <div className="text-center py-20">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
+                        <p className="text-white mt-4">Loading weather data...</p>
+                    </div>
+                ) : weatherData && (
                     <div className="text-center">
                         <img
                             src={weatherData.icon}
