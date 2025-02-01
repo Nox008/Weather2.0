@@ -90,6 +90,16 @@ const WeatherApp = () => {
         return "moderate";
     };
 
+    const getLocalTime = (timezone) => {
+        const now = new Date();
+        const localTime = now.getTime() + now.getTimezoneOffset() * 60000 + timezone * 1000;
+        const date = new Date(localTime);
+
+        // Format the date and time as "Feb 1, 10.00 AM"
+        const options = { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true };
+        return date.toLocaleString('en-US', options);
+    };
+
     const searchByCoordinates = async (latitude, longitude) => {
         try {
             const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${import.meta.env.VITE_APP_ID}`;
@@ -114,6 +124,7 @@ const WeatherApp = () => {
                 feelsLike: Math.floor(data.main.feels_like),
                 weatherIcon: data.weather[0].icon,
                 intensity: getIntensity(data.weather[0].description.toLowerCase()),
+                timezone: data.timezone,
             });
         } catch (error) {
             console.error("Error fetching data by coordinates:", error);
@@ -176,6 +187,7 @@ const WeatherApp = () => {
                 feelsLike: Math.floor(data.main.feels_like),
                 weatherIcon: data.weather[0].icon,
                 intensity: getIntensity(data.weather[0].description.toLowerCase()),
+                timezone: data.timezone,
             });
         } catch (error) {
             setWeatherData(false);
@@ -277,6 +289,9 @@ const WeatherApp = () => {
                             </p>
                             <p className={`${getTextColor(weatherData.weatherIcon)} text-sm sm:text-base opacity-75`}>
                                 {weatherData.country}
+                            </p>
+                            <p className={`${getTextColor(weatherData.weatherIcon)} text-sm sm:text-base opacity-75`}>
+                                {getLocalTime(weatherData.timezone)}
                             </p>
                         </div>
 
